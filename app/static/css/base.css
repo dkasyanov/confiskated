@@ -1,0 +1,30 @@
+.content {
+    clear: both;
+    max-width: 960px;
+    margin: 0 auto;
+}
+
+.leftbar {
+    min-height: 500px;
+    background-color: #e6b6e6;
+}
+
+.lot {
+    background-color: #c8d7ef;
+    /*height: 200px;*/
+}
+
+.img {
+    width: 160px;
+    height: 160px;
+    overflow: hidden;
+    margin: 20px 20px 20px 20px;
+}
+
+.sortbar {
+    border: dashed #000000 1px;
+}
+
+.tab {
+    padding: 10px;
+}

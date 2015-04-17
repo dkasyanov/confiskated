@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/static/css/base.css" rel="stylesheet">
+    <script src="/static/js/jquery-2.1.3.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <title>ConfiskatWeb</title>
+     <style type="text/css">
+   		.filters{
+   			min-width: 100px !important;
+   			background-color: #cbffbe;
+   		}
+   		input, select{
+   			margin: 5px;
+   		}
+   		.form-inline input{
+   			width: 70px !important;
+   		}
+  </style>
+</head>
+<body>
+{#navigation top#}
+<div class="content">
+<nav class="navbar navbar-inverse navbar-static-top">
+    <div class="container-fluid">
+        {# Brand data #}
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Brand</a>
+        </div>
+        {# data for toggling #}
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a href="#">Link<span class="sr-only">()</span></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12 filters">
+            <select name="regions" class="form-control" size="1" style="margin-top: 15px">
+					<option value="All Ukrain">All UKR</option>
+					<option value="Kiev">Kiev</option>
+            </select>
+            <select name="city" class="form-control" size="1">
+                <option value="all city">all city</option>
+                <option value="Some other">Some other</option>
+            </select>
+            <select name="regions" class="form-control" size="1">
+                <option value="All types">All types</option>
+                <option value="some">some</option>
+            </select>
+            <div class="rooms" style="margin: 15px 0 5px 10px">
+					<label>Количество комнат
+					<br>
+				      <input type="checkbox"> 1
+				      <input type="checkbox"> 2
+				      <input type="checkbox"> 3
+				      <input type="checkbox"> 4 и более
+				    </label>
+				</div>
+
+            <div class="prices" style="margin: 5px 0 5px 10px">
+                <label>Цена, грн</label>
+                <div class="row form-inline">
+                    <div class="form-group col-lg-12 col-md-12 col-sm-12">
+                        <div class="row">
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-2">
+                                <input type="text" class="form-control" placeholder="From">
+                            </div>
+                            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1" style="line-height: 40px">-</div>
+                            <div class="col-lg-4 col-md-3 col-sm-3 col-xs-2">
+                                <input type="text" class="form-control" placeholder="To">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+			</div>
+
+				<div class="square" style="margin: 5px 0 5px 10px">
+					<label>Площадь, м<sup>2</sup> </label>
+					<div class="row form-inline">
+						<div class="form-group col-lg-12 col-md-12 col-sm-12">
+                            <div class="row">
+                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-2">
+                                    <input type="text" class="form-control" placeholder="From">
+                                </div>
+                                <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 text-center" style="line-height: 40px">-</div>
+                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-2">
+                                    <input type="text" class="form-control" placeholder="To">
+                                </div>
+                            </div>
+						</div>
+					</div>
+				</div>
+				<div class="button text-center" style="margin: 20px 0 0 0">
+					<button type="button" class="btn btn-primary btn-lg">Поиск</button>
+					<br>
+					<p>
+						<a href="#">Очистить фильтры</a>
+					</p>
+				</div>
+
+        </div>
+
+
+        <div class="col-lg-7 col-md-8 col-sm-8 col-xs-12 ">
+            <div class="sortbar">Sort bar|Count: {{ lots.total }} items</div>
+
+            {% for lot in lots.items %}
+                {% include "lot.html" %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<ul class="pager">
+    {% if lots.has_prev %}
+    <li class="previous"><a href="{{ url_for('index', page = lots.prev_num) }}">{{ '<---' }}</a></li>
+    {% else %}
+    <li class="previous disabled"><a href="#">{{ '<---' }}</a></li>
+    {% endif %}
+    {% if lots.has_next %}
+    <li class="next"><a href="{{ url_for('index', page = lots.next_num) }}">{{ '--->' }}</a></li>
+    {% else %}
+    <li class="next disabled"><a href="#">{{ '--->' }}</a></li>
+    {% endif %}
+    </ul>
+</div>
+</body>
+</html>

@@ -49,39 +49,31 @@
 <div class="container">
     <div class="row">
         <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12 filters">
-            <select name="regions" class="form-control" size="1" style="margin-top: 15px">
-					<option value="All Ukrain">All UKR</option>
-					<option value="Kiev">Kiev</option>
-            </select>
-            <select name="city" class="form-control" size="1">
-                <option value="all city">all city</option>
-                <option value="Some other">Some other</option>
-            </select>
-            <select name="regions" class="form-control" size="1">
-                <option value="All types">All types</option>
-                <option value="some">some</option>
-            </select>
-            <div class="rooms" style="margin: 15px 0 5px 10px">
+            <form method="post" action="" name="filters">
+                {{ form.hidden_tag() }}
+                {{ form.regionSelector(class="form-control", size="1", style="margin-top: 15px;") }}
+                {{ form.citySelector(class="form-control", size="1") }}
+                {{ form.typeSelector(class="form-control", size="1") }}
+                <div class="rooms" style="margin: 15px 0 5px 10px">
 					<label>Количество комнат
-					<br>
-				      <input type="checkbox"> 1
-				      <input type="checkbox"> 2
-				      <input type="checkbox"> 3
-				      <input type="checkbox"> 4 и более
+                        <br>
+                        {{ form.room1() }} 1
+                        {{ form.room2() }} 2
+                        {{ form.room3() }} 3
+                        {{ form.room4() }} 4 и более
 				    </label>
 				</div>
-
             <div class="prices" style="margin: 5px 0 5px 10px">
                 <label>Цена, грн</label>
                 <div class="row form-inline">
                     <div class="form-group col-lg-12 col-md-12 col-sm-12">
                         <div class="row">
                             <div class="col-lg-4 col-md-4 col-sm-4 col-xs-2">
-                                <input type="text" class="form-control" placeholder="From">
+                                {{ form.price_from(class="form-control", placeholder="From") }}
                             </div>
                             <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1" style="line-height: 40px">-</div>
                             <div class="col-lg-4 col-md-3 col-sm-3 col-xs-2">
-                                <input type="text" class="form-control" placeholder="To">
+                                {{ form.price_to(class="form-control", placeholder="To") }}
                             </div>
                         </div>
                     </div>
@@ -94,24 +86,24 @@
 						<div class="form-group col-lg-12 col-md-12 col-sm-12">
                             <div class="row">
                                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-2">
-                                    <input type="text" class="form-control" placeholder="From">
+                                    {{ form.square_from(class="form-control", placeholder="From") }}
                                 </div>
                                 <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 text-center" style="line-height: 40px">-</div>
                                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-2">
-                                    <input type="text" class="form-control" placeholder="To">
+                                    {{ form.square_to(class="form-control", placeholder="To") }}
                                 </div>
                             </div>
 						</div>
 					</div>
 				</div>
 				<div class="button text-center" style="margin: 20px 0 0 0">
-					<button type="button" class="btn btn-primary btn-lg">Поиск</button>
+					<button type="submit" class="btn btn-primary btn-lg">Поиск</button>
 					<br>
 					<p>
-						<a href="#">Очистить фильтры</a>
+						<a href="{{ url_for('index') }}">Очистить фильтры</a>
 					</p>
 				</div>
-
+            </form>
         </div>
 
 

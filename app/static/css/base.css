@@ -10,7 +10,10 @@
 }
 
 .lot {
-    background-color: #c8d7ef;
+    /*background-color: #c8d7ef;*/
+    /*border: 1px solid #c8d7ef;*/
+    border: 1px solid transparent;
+
     /*height: 200px;*/
 }
 
@@ -27,4 +30,35 @@
 
 .tab {
     padding: 10px;
+}
+
+.type {
+    font: 'Consolas', 'Deja Vu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+    font-size: .90em;
+}
+
+.address {
+    font-size: .85em;
+    font-weight: bold;
+}
+
+.region {
+    font-size: .80em;
+
+}
+
+.common_info {
+    font-size: .85em;
+}
+
+.link, .link:hover{
+    color: inherit;
+
+}
+
+.lot:hover {
+    border: 1px green solid;
+    background-color: rgba(0, 255, 0, .1);
+
+
 }

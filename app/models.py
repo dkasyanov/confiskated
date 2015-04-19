@@ -13,13 +13,29 @@ class Address(db.Document):
     other = StringField(default='')
 
 
+class Square(db.Document):
+    common = FloatField(default=-1)
+    living = FloatField(default=-1)
+    kitchen = FloatField(default=-1)
+    bathroom = FloatField(default=-1)
+    toilet = FloatField(default=-1)
+    wc = FloatField(default=-1)
+    territory = FloatField(default=-1)
+
+
+class Communication(db.Document):
+    water = StringField(default='')
+    heat = StringField(default='')
+    other = StringField(default='')
+
+
 class Lot(db.Document):
     id = IntField()
     link = StringField()
     type = StringField()
     address = DocumentField(Address)
-    square = DictField(FloatField(), default={})
-    communications = DictField(StringField(), default={})
+    square = DocumentField(Square, default=None)
+    communications = DocumentField(Communication, default=None)
     rooms = IntField(default=-1)
     level = StringField(default='')
     build_year = StringField(default='')

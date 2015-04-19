@@ -3,7 +3,7 @@ __author__ = 'dkasyanov'
 
 import requests
 import lxml.html
-from app.models import Lot, Address
+from app.models import Lot, Address, Square, Communication
 from datetime import datetime
 from app import db
 
@@ -65,7 +65,7 @@ def parse_lot(page):
         address.city = address_string.split(',')[0].strip()
     else:
         address.region = " ".join(address_string.split(' ')[-2:]).strip()
-        address.city = "".join(address_string.split(' ')[:-2]).strip()
+        address.city = " ".join(address_string.split(' ')[:-2]).strip()
     if len(address_string.split(',')) == 3:
         address.street = address_string.split(',')[1].strip()
     lot.address = address
@@ -81,28 +81,30 @@ def parse_lot(page):
         lot.level = unicode(trs[u'Этаж'])
     if u'Год постройки' in trs:
         lot.build_year = unicode(trs[u'Год постройки'])
-    squares = dict()
+    squares = Square()
     if u'Общая площадь' in trs:
-        squares[u'common'] = float(trs[u'Общая площадь'].split()[0].split(' ')[0])
+        squares.common = float(trs[u'Общая площадь'].split()[0].split(' ')[0])
     if u'Жилая площадь' in trs:
-        squares[u'living'] = float(trs[u'Жилая площадь'].split(' ')[0])
+        squares.living = float(trs[u'Жилая площадь'].split(' ')[0])
     if u'Площадь кухни' in trs:
-        squares[u'kitchen'] = float(trs[u'Площадь кухни'].split(' ')[0])
+        squares.kitchen = float(trs[u'Площадь кухни'].split(' ')[0])
     if u'Площадь с/у' in trs:
         if u'/' in trs[u'Площадь с/у'].split(' ')[0]:
-            squares[u'bathroom'] = float(trs[u'Площадь с/у'].split(' ')[0].split('/')[0])
-            squares[u'toilet'] = float(trs[u'Площадь с/у'].split(' ')[0].split('/')[1])
+            squares.bathroom = float(trs[u'Площадь с/у'].split(' ')[0].split('/')[0])
+            squares.toilet = float(trs[u'Площадь с/у'].split(' ')[0].split('/')[1])
         else:
-            squares[u'wc'] = float(trs[u'Площадь с/у'].split(' ')[0])
+            squares.wc = float(trs[u'Площадь с/у'].split(' ')[0])
+    if u'Площадь земли' in trs:
+        squares.territory = float(trs[u'Площадь земли'].split(' ')[0])
     if squares:
         lot.square = squares
-    communications = dict()
+    communications = Communication()
     if u'Водоснабжение' in trs:
-        communications[u'water'] = unicode(trs[u'Водоснабжение'])
+        communications.water = unicode(trs[u'Водоснабжение'])
     if u'Отопление' in trs:
-        communications[u'heat'] = unicode(trs[u'Отопление'])
+        communications.heat = unicode(trs[u'Отопление'])
     if u'Коммуникации' in trs:
-        communications[u'other'] = unicode(trs[u'Коммуникации'])
+        communications.other = unicode(trs[u'Коммуникации'])
     if communications:
         lot.communications = communications
     photos = []

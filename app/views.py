@@ -5,7 +5,6 @@ from flask import render_template, redirect, url_for, request, g, session, jsoni
 from forms import FiltersForm
 from config import LOTS_PER_PAGE
 from models import Lot, Address, Type, Region, Country, City, Square
-import urllib
 import json
 
 
@@ -20,7 +19,6 @@ def index(page=1):
     types = [(u'0', u'Все категории')]
 
     regions.extend(sorted([(i.id, i.name) for i in Region.query.all()], key=lambda x: x[1]))
-    #cities.extend(sorted(set([(i, i) for i in Lot.query.filter(Lot.address.region == u'Донецкая область').distinct(Lot.address.city)])))
     types.extend([(i.id, i.name) for i in Type.query.all()])
 
     form.regionSelector.choices = regions
@@ -28,29 +26,10 @@ def index(page=1):
     form.typeSelector.choices = types
     lots = Lot.query
     if form.is_submitted():
-        region_id = (int(form.regionSelector.data) if int(form.regionSelector.data) > 0 else None)
-        city_id = (int(form.citySelector.data) if int(form.citySelector.data) > 0 else None)
-        type_id = (int(form.typeSelector.data) if int(form.typeSelector.data) > 0 else None)
-        room = {'1': form.room1.data, '2': form.room2.data, '3': form.room3.data, '4': form.room4.data}
-        price_from = form.price_from.data
-        price_to = form.price_to.data
-        square_from = form.square_from.data
-        square_to = form.square_to.data
-        rr = ''
-        for i in sorted(room.keys()):
-            rr += str(int(room[i]))
-        if rr == '0000':
-            rr = None
+        filter_action(form)
+        return redirect(url_for('filter'))
 
-        form_filter = {'r': region_id, 'c': city_id, 't': type_id,
-                  'pf': price_from, 'pt': price_to,
-                  'sf': square_from, 'st': square_to,
-                  'rr': rr}
-        session['form_filter'] = json.dumps(form_filter)
-        return redirect(url_for('filter', page=page))
-
-
-    lots = lots.paginate(page, per_page=LOTS_PER_PAGE, error_out=True)
+    lots = sort_lots(lots).paginate(page, per_page=LOTS_PER_PAGE, error_out=True)
     return render_template('index.html',
                            lots=lots,
                            form=form)
@@ -62,25 +41,7 @@ def filter(page=1):
     data = json.loads(session['form_filter'])
     form = FiltersForm()
     if form.is_submitted():
-        region_id = (int(form.regionSelector.data) if int(form.regionSelector.data) > 0 else None)
-        city_id = (int(form.citySelector.data) if int(form.citySelector.data) > 0 else None)
-        type_id = (int(form.typeSelector.data) if int(form.typeSelector.data) > 0 else None)
-        room = {'1': form.room1.data, '2': form.room2.data, '3': form.room3.data, '4': form.room4.data}
-        price_from = form.price_from.data
-        price_to = form.price_to.data
-        square_from = form.square_from.data
-        square_to = form.square_to.data
-        rr = ''
-        for i in sorted(room.keys()):
-            rr += str(int(room[i]))
-        if rr == '0000':
-            rr = None
-
-        form_filter = {'r': region_id, 'c': city_id, 't': type_id,
-                       'pf': price_from, 'pt': price_to,
-                       'sf': square_from, 'st': square_to,
-                       'rr': rr}
-        session['form_filter'] = json.dumps(form_filter)
+        filter_action(form)
         return redirect(url_for('filter', page=page))
 
     regions = [(u'0', u'Вся Украина')]
@@ -88,7 +49,6 @@ def filter(page=1):
     types = [(u'0', u'Все категории')]
 
     regions.extend(sorted([(i.id, i.name) for i in Region.query.all()], key=lambda x: x[1]))
-    #cities.extend(sorted(set([(i, i) for i in Lot.query.filter(Lot.address.region == u'Донецкая область').distinct(Lot.address.city)])))
     types.extend([(i.id, i.name) for i in Type.query.all()])
 
     form.regionSelector.choices = regions
@@ -130,7 +90,7 @@ def filter(page=1):
         form.room3.default = 3 if 3 in rr else 0
         form.room4.default = 4 if 4 in rr else 0
 
-    lots = lots.paginate(page, per_page=LOTS_PER_PAGE, error_out=True)
+    lots = sort_lots(lots).paginate(page, per_page=LOTS_PER_PAGE, error_out=True)
     form.process()
     return render_template('filter.html',
                            lots=lots,
@@ -141,3 +101,46 @@ def filter(page=1):
 def get_cities():
     cities = sorted([(i.name, i.id) for i in City.query.filter_by(region_id=int(request.form['region'])).order_by(City.name).all()])
     return jsonify(cities)
+
+
+@app.route('/sort_by', methods=['POST'])
+def sort_by():
+    session['sort_type'] = request.form['sort_type']
+    session['direction'] = request.form['sort_dir']
+    return jsonify([])
+
+
+def sort_lots(lots):
+    if session['sort_type'] == 'price':
+        if session['direction'] == 'asc':
+            lots = lots.order_by(Lot.price)
+        else:
+            lots = lots.order_by(Lot.price.desc())
+    elif session['sort_type'] == 'date':
+        if session['direction'] == 'asc':
+            lots = lots.order_by(Lot.date)
+        else:
+            lots = lots.order_by(Lot.date.desc())
+    return lots
+
+
+def filter_action(form):
+    region_id = (int(form.regionSelector.data) if int(form.regionSelector.data) > 0 else None)
+    city_id = (int(form.citySelector.data) if int(form.citySelector.data) > 0 else None)
+    type_id = (int(form.typeSelector.data) if int(form.typeSelector.data) > 0 else None)
+    room = {'1': form.room1.data, '2': form.room2.data, '3': form.room3.data, '4': form.room4.data}
+    price_from = form.price_from.data
+    price_to = form.price_to.data
+    square_from = form.square_from.data
+    square_to = form.square_to.data
+    rr = ''
+    for i in sorted(room.keys()):
+        rr += str(int(room[i]))
+    if rr == '0000':
+        rr = None
+
+    form_filter = {'r': region_id, 'c': city_id, 't': type_id,
+                   'pf': price_from, 'pt': price_to,
+                   'sf': square_from, 'st': square_to,
+                   'rr': rr}
+    session['form_filter'] = json.dumps(form_filter)

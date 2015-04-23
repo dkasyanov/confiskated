@@ -19,6 +19,7 @@
    			width: 70px !important;
    		}
   </style>
+
 </head>
 <body>
 {#navigation top#}
@@ -45,89 +46,24 @@
         </div>
     </div>
 </nav>
+{% block content %}{% endblock %}
+<script type="text/javascript">
+        $( "#regionSelector" ).change(function() {
+            var citySelector = document.getElementById('citySelector');
 
-<div class="container">
-    <div class="row">
-        <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12 filters">
-            <form method="post" action="" name="filters">
-                {{ form.hidden_tag() }}
-                {{ form.regionSelector(class="form-control", size="1", style="margin-top: 15px;") }}
-                {{ form.citySelector(class="form-control", size="1") }}
-                {{ form.typeSelector(class="form-control", size="1") }}
-                <div class="rooms" style="margin: 15px 0 5px 10px">
-					<label>Количество комнат
-                        <br>
-                        {{ form.room1() }} 1
-                        {{ form.room2() }} 2
-                        {{ form.room3() }} 3
-                        {{ form.room4() }} 4 и более
-				    </label>
-				</div>
-            <div class="prices" style="margin: 5px 0 5px 10px">
-                <label>Цена, грн</label>
-                <div class="row form-inline">
-                    <div class="form-group col-lg-12 col-md-12 col-sm-12">
-                        <div class="row">
-                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-2">
-                                {{ form.price_from(class="form-control", placeholder="From") }}
-                            </div>
-                            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1" style="line-height: 40px">-</div>
-                            <div class="col-lg-4 col-md-3 col-sm-3 col-xs-2">
-                                {{ form.price_to(class="form-control", placeholder="To") }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-			</div>
+            $.post('/get_cities', {
+                region: $( "#regionSelector option:selected").val()
+            }).done(function(cities){
+                for (var key in cities){
+                    var opt = document.createElement('option');
+                    opt.value = cities[key].toString();
+                    opt.innerHTML = key;
+                    citySelector.appendChild(opt);
+}
+            })
 
-				<div class="square" style="margin: 5px 0 5px 10px">
-					<label>Площадь, м<sup>2</sup> </label>
-					<div class="row form-inline">
-						<div class="form-group col-lg-12 col-md-12 col-sm-12">
-                            <div class="row">
-                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-2">
-                                    {{ form.square_from(class="form-control", placeholder="From") }}
-                                </div>
-                                <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 text-center" style="line-height: 40px">-</div>
-                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-2">
-                                    {{ form.square_to(class="form-control", placeholder="To") }}
-                                </div>
-                            </div>
-						</div>
-					</div>
-				</div>
-				<div class="button text-center" style="margin: 20px 0 0 0">
-					<button type="submit" class="btn btn-primary btn-lg">Поиск</button>
-					<br>
-					<p>
-						<a href="{{ url_for('index') }}">Очистить фильтры</a>
-					</p>
-				</div>
-            </form>
-        </div>
-
-
-        <div class="col-lg-7 col-md-8 col-sm-8 col-xs-12 ">
-            <div class="sortbar">Sort bar|Count: {{ lots.total }} items</div>
-
-            {% for lot in lots.items %}
-                {% include "lot.html" %}
-            {% endfor %}
-        </div>
-    </div>
-</div>
-<ul class="pager">
-    {% if lots.has_prev %}
-    <li class="previous"><a href="{{ url_for('index', page = lots.prev_num) }}">{{ '<---' }}</a></li>
-    {% else %}
-    <li class="previous disabled"><a href="#">{{ '<---' }}</a></li>
-    {% endif %}
-    {% if lots.has_next %}
-    <li class="next"><a href="{{ url_for('index', page = lots.next_num) }}">{{ '--->' }}</a></li>
-    {% else %}
-    <li class="next disabled"><a href="#">{{ '--->' }}</a></li>
-    {% endif %}
-    </ul>
+        });
+    </script>
 </div>
 </body>
 </html>

@@ -3,16 +3,20 @@
         <a href="{{ lot.link }}" class="link" target="_blank">
         <div class="col-lg-4 col-md-5 col-sm-6 col-xs-4 text-center">
             <div class="img">
+                {% if lot.photo %}
                 <img src="{{ lot.photo[0].replace('carousel', 'thumb') }}">
+                {% else %}
+                <img src="http://fakeimg.pl/160/?text=No Photo">
+                {% endif %}
             </div>
         </div>
         </a>
         <div class="col-lg-4 col-md-7 col-sm-6 col-xs-4 tab" style="position:relative;">
         <a href="{{ lot.link }}" class="link" target="_blank">
         <dl>
-            <dd><span class="text-center text-uppercase type">{{ lot.type }}</span></dd>
-            <dd><span class="text address">{{ lot.address.city }}<br>{{ lot.address.street }}</span></dd>
-            <dd><span class="text region">{{ lot.address.region }}</span></dd>
+            <dd><span class="text-center text-uppercase type">{{ lot.type.name }}</span></dd>
+            <dd><span class="text address">{{ lot.address.city.name }}<br>{{ lot.address.street }}</span></dd>
+            <dd><span class="text region">{{ lot.address.region.name }}</span></dd>
         </dl>
         </a>
         <span class="common_info">
@@ -45,10 +49,10 @@
 {#                <div class="col-lg-12 col-md-0 col-sm-0 col-xs-0"></div>#}
 {#            </span>#}
             <label style="margin-left: 40px">Price: {{ lot.price }} UAH</label>
-            {% if lot.price_credit != -1 %}
+            {% if lot.price_credit %}
             <label style="margin-left: 40px">Price credit: {{ lot.price_credit }} UAH</label>
             {% endif %}
-            {% if lot.price_rent != -1 %}
+            {% if lot.price_rent %}
             <label style="margin-left: 40px">Price rent: {{ lot.price_rent }} UAH</label>
             {% endif %}
         </div>

@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12 filters">
+            <form method="post" action="" name="filters">
+                {{ form.hidden_tag() }}
+                {{ form.regionSelector(class="form-control", size="1", style="margin-top: 15px;") }}
+                {{ form.citySelector(class="form-control", size="1") }}
+                {{ form.typeSelector(class="form-control", size="1") }}
+                <div class="rooms" style="margin: 15px 0 5px 10px">
+					<label>Количество комнат</label>
+                        <br>
+                        {{ form.room1() }} <label for="room1">1</label>
+                        {{ form.room2() }} <label for="room2">2</label>
+                        {{ form.room3() }} <label for="room3">3</label>
+                        {{ form.room4() }} <label for="room4">4 и более</label>
+				</div>
+            <div class="prices" style="margin: 5px 0 5px 10px">
+                <label>Цена, грн</label>
+                <div class="row form-inline">
+                    <div class="form-group col-lg-12 col-md-12 col-sm-12">
+                        <div class="row">
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-2">
+                                {{ form.price_from(class="form-control", placeholder="From") }}
+                            </div>
+                            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1" style="line-height: 40px">-</div>
+                            <div class="col-lg-4 col-md-3 col-sm-3 col-xs-2">
+                                {{ form.price_to(class="form-control", placeholder="To") }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+			</div>
+
+				<div class="square" style="margin: 5px 0 5px 10px">
+					<label>Площадь, м<sup>2</sup> </label>
+					<div class="row form-inline">
+						<div class="form-group col-lg-12 col-md-12 col-sm-12">
+                            <div class="row">
+                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-2">
+                                    {{ form.square_from(class="form-control", placeholder="From") }}
+                                </div>
+                                <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 text-center" style="line-height: 40px">-</div>
+                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-2">
+                                    {{ form.square_to(class="form-control", placeholder="To") }}
+                                </div>
+                            </div>
+						</div>
+					</div>
+				</div>
+				<div class="button text-center" style="margin: 20px 0 0 0">
+					<button type="submit" class="btn btn-primary btn-lg">Поиск</button>
+					<br>
+					<p>
+						<a href="{{ url_for('index') }}">Очистить фильтры</a>
+					</p>
+				</div>
+            </form>
+        </div>
+
+
+        <div class="col-lg-7 col-md-8 col-sm-8 col-xs-12 ">
+            <div class="sortbar">Sort bar|Count: {{ lots.total }} items</div>
+            <div>{{ request.query_string }}</div>
+
+            {% for lot in lots.items %}
+                {% include "lot.html" %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<ul class="pager">
+    {% if lots.has_prev %}
+    <li class="previous"><a href="{{ url_for('filter', page = lots.prev_num) }}">{{ '<---' }}</a></li>
+    {% else %}
+    <li class="previous disabled"><a href="#">{{ '<---' }}</a></li>
+    {% endif %}
+    {% if lots.has_next %}
+    <li class="next"><a href="{{ url_for('filter', page = lots.next_num) }}">{{ '--->' }}</a></li>
+    {% else %}
+    <li class="next disabled"><a href="#">{{ '--->' }}</a></li>
+    {% endif %}
+</ul>
+{% endblock %}

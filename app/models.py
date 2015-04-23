@@ -1,62 +1,98 @@
 # -*- coding: utf-8 -*-
 __author__ = 'dkasyanov'
 from app import db
-from mongoalchemy.fields import IntField, StringField, DocumentField, DictField, FloatField, ListField, DateTimeField
-import datetime
 
 
-class Address(db.Document):
-    country = StringField(default=u'Украина')
-    region = StringField(default='')
-    city = StringField(default='')
-    street = StringField(default='')
-    other = StringField(default='')
+class Address(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    country_id = db.Column(db.Integer, db.ForeignKey('country.id'))
+    country = db.relationship('Country')
+    region_id = db.Column(db.Integer, db.ForeignKey('region.id'))
+    region = db.relationship('Region')
+    city_id = db.Column(db.Integer, db.ForeignKey('city.id'))
+    city = db.relationship('City')
+    street = db.Column(db.String(128), default='')
+    other = db.Column(db.String(128), default='')
 
 
-class Square(db.Document):
-    common = FloatField(default=-1)
-    living = FloatField(default=-1)
-    kitchen = FloatField(default=-1)
-    bathroom = FloatField(default=-1)
-    toilet = FloatField(default=-1)
-    wc = FloatField(default=-1)
-    territory = FloatField(default=-1)
+class Country(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128), unique=True)
+    regions = db.relationship('Region', backref='country', lazy='dynamic')
 
 
-class Communication(db.Document):
-    water = StringField(default='')
-    heat = StringField(default='')
-    other = StringField(default='')
+class Region(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128))
+    cities = db.relationship('City', backref='region', lazy='dynamic')
+    country_id = db.Column(db.Integer, db.ForeignKey('country.id'))
 
 
-class Lot(db.Document):
-    id = IntField()
-    link = StringField()
-    type = StringField()
-    address = DocumentField(Address)
-    square = DocumentField(Square, default=None)
-    communications = DocumentField(Communication, default=None)
-    rooms = IntField(default=-1)
-    level = StringField(default='')
-    build_year = StringField(default='')
-    description = StringField(default='')
-    photo = ListField(StringField(), default=[])
-    price = IntField()
-    price_credit = IntField(default=-1)
-    price_rent = IntField(default=-1)
-    date = DateTimeField()
-    source = StringField(default='')
+class City(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128))
+    region_id = db.Column(db.Integer, db.ForeignKey('region.id'))
+
+
+class Square(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    common = db.Column(db.Float)
+    living = db.Column(db.Float)
+    kitchen = db.Column(db.Float)
+    bathroom = db.Column(db.Float)
+    toilet = db.Column(db.Float)
+    wc = db.Column(db.Float)
+    territory = db.Column(db.Float)
+
+
+# class Communication(db.Document):
+#     water = StringField(default='')
+#     heat = StringField(default='')
+#     other = StringField(default='')
+
+
+class Type(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, unique=True)
+
+
+class Photo(db.Model):
+    photo_id = db.Column(db.Integer, primary_key=True)
+    photo = db.Column(db.String(256), unique=True)
+
+
+class Lot(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    source_id = db.Column(db.Integer)
+    link = db.Column(db.String(128))
+    type = db.relationship('Type')
+    type_id = db.Column(db.Integer, db.ForeignKey('type.id'))
+    address = db.relationship('Address')
+    address_id = db.Column(db.Integer, db.ForeignKey('address.id'))
+    square = db.relationship('Square')
+    square_id = db.Column(db.Integer, db.ForeignKey('square.id'))
+    communications = db.Column(db.PickleType)
+    rooms = db.Column(db.Integer, default=-1)
+    level = db.Column(db.String(8))
+    build_year = db.Column(db.String(4))
+    description = db.Column(db.String(512))
+    photo = db.Column(db.PickleType)
+    price = db.Column(db.Integer)
+    price_credit = db.Column(db.Integer)
+    price_rent = db.Column(db.Integer)
+    date = db.Column(db.DateTime)
+    source = db.Column(db.String(128))
 
     def get_attributes(self):
         return [k for k in self.__dict__.keys()
                 if not k.startswith('_')
                 and not k.endswith('_')]
 
-    def __eq__(self, other):
+    def compare(self, other):
         if not self or not other:
             return False
         for attr in self.get_attributes():
-            if attr == 'date':
+            if attr == 'date' or attr == 'id':
                 continue
             if self.__getattribute__(attr) != other.__getattribute__(attr):
                 return False

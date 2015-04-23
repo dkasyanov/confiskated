@@ -49,8 +49,12 @@
 {% block content %}{% endblock %}
 <script type="text/javascript">
         $( "#regionSelector" ).change(function() {
-            var citySelector = document.getElementById('citySelector');
-
+            var citySelector = $( '#citySelector' );
+            citySelector.empty();
+            var option = document.createElement('option');
+            option.value = '0';
+            option.innerHTML = 'Все города';
+            citySelector.append(option);
             $.post('/get_cities', {
                 region: $( "#regionSelector option:selected").val()
             }).done(function(cities){
@@ -58,7 +62,7 @@
                     var opt = document.createElement('option');
                     opt.value = cities[key].toString();
                     opt.innerHTML = key;
-                    citySelector.appendChild(opt);
+                    citySelector.append(opt);
 }
             })
 

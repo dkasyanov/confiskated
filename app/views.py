@@ -111,12 +111,12 @@ def sort_by():
 
 
 def sort_lots(lots):
-    if session['sort_type'] == 'price':
+    if session.get('sort_type', None) == 'price':
         if session['direction'] == 'asc':
             lots = lots.order_by(Lot.price)
         else:
             lots = lots.order_by(Lot.price.desc())
-    elif session['sort_type'] == 'date':
+    elif session.get('sort_type', None) == 'date':
         if session['direction'] == 'asc':
             lots = lots.order_by(Lot.date)
         else:

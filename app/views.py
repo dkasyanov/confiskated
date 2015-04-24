@@ -8,7 +8,7 @@ from models import Lot, Address, Type, Region, Country, City, Square
 import json
 
 
-@app.route('/')
+@app.route('/', methods=['POST', 'GET'])
 @app.route('/index', methods=['POST', 'GET'])
 @app.route('/index/<int:page>', methods=['POST', 'GET'])
 def index(page=1):

@@ -45,12 +45,6 @@ class Square(db.Model):
     territory = db.Column(db.Float)
 
 
-# class Communication(db.Document):
-#     water = StringField(default='')
-#     heat = StringField(default='')
-#     other = StringField(default='')
-
-
 class Type(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=True)
@@ -59,6 +53,13 @@ class Type(db.Model):
 class Photo(db.Model):
     photo_id = db.Column(db.Integer, primary_key=True)
     photo = db.Column(db.String(256), unique=True)
+
+
+class Bank(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120))
+    website = db.Column(db.String(120))
+    logo = db.Column(db.String(256))
 
 
 class Lot(db.Model):
@@ -82,6 +83,8 @@ class Lot(db.Model):
     price_rent = db.Column(db.Integer)
     date = db.Column(db.DateTime)
     source = db.Column(db.String(128))
+    bank_id = db.Column(db.Integer, db.ForeignKey('bank.id'))
+    bank = db.relationship('Bank')
 
     def get_attributes(self):
         return [k for k in self.__dict__.keys()

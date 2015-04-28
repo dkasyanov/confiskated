@@ -48,9 +48,9 @@
 {#            <span class="row">#}
 {#                <div class="col-lg-12 col-md-0 col-sm-0 col-xs-0"></div>#}
 {#            </span>#}
-            <label style="margin-left: 40px">Price: {{ lot.price }} UAH</label>
+            <label style="margin-left: 40px">Price: {{ '{0:,}'.format(lot.price) }} UAH</label>
             {% if lot.price_credit %}
-            <label style="margin-left: 40px">Price credit: {{ lot.price_credit }} UAH</label>
+            <label style="margin-left: 40px">Price credit: {{ '{0:,}'.format(lot.price_credit) }} UAH</label>
             {% endif %}
             {% if lot.price_rent %}
             <label style="margin-left: 40px">Price rent: {{ lot.price_rent }} UAH</label>

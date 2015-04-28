@@ -3,7 +3,7 @@ __author__ = 'dkasyanov'
 
 import requests
 import lxml.html
-from app.models import Lot, Address, Country, Region, City, Type, Square#, Communication
+from app.models import Lot, Address, Country, Region, City, Type, Square, Bank
 from datetime import datetime
 from app import db
 
@@ -12,7 +12,8 @@ base_url = "http://planetestate.com.ua/estate/sell"
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; it; rv:1.8.1.11) Gecko/20071127 Firefox/2.0.0.11'
 }
-SOURCE = 'www.planetestate.com.ua'
+SOURCE = u'www.planetestate.com.ua'
+BANK = u'ПриватБанк'
 
 
 def is_last_page(data):
@@ -141,6 +142,8 @@ def parse_lot(page):
             lot.description = unicode(obj.cssselect('.objFeatures')[0].xpath('./text()')[-1].strip())
         lot.date = datetime.utcnow()
         lot.source = SOURCE
+        lot.bank = bank
+        lot.bank_id = bank.id
         return lot
     except requests.ConnectionError:
         print "Error parsing %s" % page
@@ -148,6 +151,11 @@ def parse_lot(page):
 
 
 def update_data():
+    global bank
+    bank = Bank()
+    bank.name = u'ПриватБанк'
+    bank.website = u'http://privatbank.ua'
+    bank.logo = u'https://privatbank.ua/img/logo.png'
     lot_links = get_lots_links()
     # lot_links = ['http://planetestate.com.ua/estate/8505']
     for lot in lot_links:

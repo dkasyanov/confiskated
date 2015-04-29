@@ -4,7 +4,7 @@ from app import app, db
 from flask import render_template, redirect, url_for, request, g, session, jsonify
 from forms import FiltersForm
 from config import LOTS_PER_PAGE
-from models import Lot, Address, Type, Region, Country, City, Square
+from models import Lot, Address, Type, Region, Country, City, Square, Bank
 import json
 
 
@@ -17,13 +17,17 @@ def index(page=1):
     regions = [(u'0', u'Вся Украина')]
     cities = [(u'0', u'Все города')]
     types = [(u'0', u'Все категории')]
+    banks = [(u'0', u'Все банки')]
 
     regions.extend(sorted([(i.id, i.name) for i in Region.query.all()], key=lambda x: x[1]))
     types.extend([(i.id, i.name) for i in Type.query.all()])
+    banks.extend([(i.id, i.name) for i in Bank.query.all()])
 
     form.regionSelector.choices = regions
     form.citySelector.choices = cities
     form.typeSelector.choices = types
+    form.bankSelector.choices = banks
+
     lots = Lot.query
     if form.is_submitted():
         filter_action(form)
@@ -47,13 +51,16 @@ def filter(page=1):
     regions = [(u'0', u'Вся Украина')]
     cities = [(u'0', u'Все города')]
     types = [(u'0', u'Все категории')]
+    banks = [(u'0', u'Все банки')]
 
     regions.extend(sorted([(i.id, i.name) for i in Region.query.all()], key=lambda x: x[1]))
     types.extend([(i.id, i.name) for i in Type.query.all()])
+    banks.extend([(i.id, i.name) for i in Bank.query.all()])
 
     form.regionSelector.choices = regions
     form.citySelector.choices = cities
     form.typeSelector.choices = types
+    form.bankSelector.choices = banks
     lots = Lot.query
     if data.get('r'):
         lots = lots.join(Address).filter(Address.region_id == int(data.get('r')))
@@ -67,6 +74,9 @@ def filter(page=1):
     if data.get('t'):
         lots = lots.join(Type).filter(Type.id == int(data.get('t')))
         form.typeSelector.default = int(data.get('t'))
+    if data.get('b'):
+        lots = lots.join(Bank).filter(Bank.id == int(data.get('b')))
+        form.bankSelector.default = int(data.get('b'))
     if data.get('pf'):
         lots = lots.filter(Lot.price >= int(data.get('pf')))
         form.price_from.default = int(data.get('pf'))
@@ -128,6 +138,7 @@ def filter_action(form):
     region_id = (int(form.regionSelector.data) if int(form.regionSelector.data) > 0 else None)
     city_id = (int(form.citySelector.data) if int(form.citySelector.data) > 0 else None)
     type_id = (int(form.typeSelector.data) if int(form.typeSelector.data) > 0 else None)
+    bank_id = (int(form.bankSelector.data) if int(form.bankSelector.data) > 0 else None)
     room = {'1': form.room1.data, '2': form.room2.data, '3': form.room3.data, '4': form.room4.data}
     price_from = form.price_from.data
     price_to = form.price_to.data
@@ -139,7 +150,7 @@ def filter_action(form):
     if rr == '0000':
         rr = None
 
-    form_filter = {'r': region_id, 'c': city_id, 't': type_id,
+    form_filter = {'r': region_id, 'c': city_id, 't': type_id, 'b': bank_id,
                    'pf': price_from, 'pt': price_to,
                    'sf': square_from, 'st': square_to,
                    'rr': rr}

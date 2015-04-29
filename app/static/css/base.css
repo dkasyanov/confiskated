@@ -19,7 +19,7 @@
 
 .img {
     width: 160px;
-    height: 160px;
+    height: 180px;
     overflow: hidden;
     margin: 20px 20px 20px 20px;
 }
@@ -61,4 +61,18 @@
     background-color: rgba(0, 255, 0, .1);
 
 
+}
+
+.price {
+    color: green;
+    font-size: x-large;
+}
+
+.logo {
+    background-color: white;
+    width: 160px;
+
+    position: relative;
+    float: left;
+    clear: left;
 }

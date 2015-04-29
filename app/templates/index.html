@@ -8,6 +8,7 @@
                 {{ form.regionSelector(class="form-control", size="1", style="margin-top: 15px;") }}
                 {{ form.citySelector(class="form-control", size="1") }}
                 {{ form.typeSelector(class="form-control", size="1") }}
+                {{ form.bankSelector(class="form-control", size="1") }}
                 <div class="rooms" style="margin: 15px 0 5px 10px">
 					<label>Количество комнат</label>
                         <br>
@@ -75,44 +76,9 @@
 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 text-center">
 <span class="col-lg-2">Total: {{ lots.total }}</span>
 <span class="col-lg-10">
-<ul class="pagination pagination-sm">
-    {% if lots.has_prev %}
-    <li>
-        <a href="{{ url_for('index', page = lots.prev_num) }}">
-        {% else %}
-    <li class="disabled">
-        <a href="#" aria-label="Previous">
-        {% endif %}
-            <span aria-hidden="true">&laquo;</span>
-        </a>
-    </li>
-
-    {% for i in range(lots.page - 5, lots.page) %}
-    {% if i > 0 %}
-        <li><a href="{{ url_for('index', page = i) }}">{{ i }}</a></li>
-    {% endif %}
-    {% endfor %}
-
-    <li class="active"><a href="{{ url_for('index', page = lots.page) }}">{{ lots.page }}</a></li>
-
-    {% for i in range(lots.page + 1, lots.page + 6) %}
-        {% if i <= lots.pages%}
-    <li><a href="{{ url_for('index', page = i) }}">{{ i }}</a></li>
-        {% endif %}
-    {% endfor %}
-
-    {% if lots.has_next %}
-    <li>
-        <a href="{{ url_for('index', page = lots.next_num) }}">
-        {% else %}
-    <li class="disabled">
-        <a href="#" aria-label="Previous">
-        {% endif %}
-            <span aria-hidden="true">&raquo;</span>
-        </a>
-    </li>
-
-</ul>
+{% with page_name='index' %}
+{% include 'pagination.html' %}
+{% endwith %}
 </span>
 </div>
 {% endblock %}

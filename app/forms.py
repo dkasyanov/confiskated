@@ -7,6 +7,7 @@ class FiltersForm(Form):
     regionSelector = SelectField(u"regions", coerce=int)
     citySelector = SelectField(u"cities", coerce=int)
     typeSelector = SelectField(u"Type", coerce=int)
+    bankSelector = SelectField(u'Bank', coerce=int)
     room1 = BooleanField(u'room1', default=False)
     room2 = BooleanField(u'room2', default=False)
     room3 = BooleanField(u'room3', default=False)

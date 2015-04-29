@@ -1,0 +1,38 @@
+<ul class="pagination pagination-sm">
+    {% if lots.has_prev %}
+    <li>
+        <a href="{{ url_for(page_name, page = lots.prev_num) }}">
+        {% else %}
+    <li class="disabled">
+        <a href="#" aria-label="Previous">
+        {% endif %}
+            <span aria-hidden="true">&laquo;</span>
+        </a>
+    </li>
+
+    {% for i in range(lots.page - 5, lots.page) %}
+    {% if i > 0 %}
+        <li><a href="{{ url_for(page_name, page = i) }}">{{ i }}</a></li>
+    {% endif %}
+    {% endfor %}
+
+    <li class="active"><a href="{{ url_for(page_name, page = lots.page) }}">{{ lots.page }}</a></li>
+
+    {% for i in range(lots.page + 1, lots.page + 6) %}
+        {% if i <= lots.pages%}
+    <li><a href="{{ url_for(page_name, page = i) }}">{{ i }}</a></li>
+        {% endif %}
+    {% endfor %}
+
+    {% if lots.has_next %}
+    <li>
+        <a href="{{ url_for(page_name, page = lots.next_num) }}">
+        {% else %}
+    <li class="disabled">
+        <a href="#" aria-label="Previous">
+        {% endif %}
+            <span aria-hidden="true">&raquo;</span>
+        </a>
+    </li>
+
+</ul>

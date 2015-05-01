@@ -38,7 +38,10 @@
         </span>
         </div>
         <div class="col-lg-4 col-md-12 col-sm-8 col-xs-4 tab right">
-            <label style="margin-left: 40px">Price: <b class="price">{{ '{0:,}'.format(lot.price) }}</b> UAH</label>
+            <label style="margin-left: 40px">
+                Price:
+                <strong class="price"> {{ '{0:,}'.format(lot.price) }} </strong>
+                UAH</label>
             {% if lot.price_credit %}
             <label style="margin-left: 40px">Price credit: {{ '{0:,}'.format(lot.price_credit) }} UAH</label>
             {% endif %}

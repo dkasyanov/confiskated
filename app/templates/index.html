@@ -61,7 +61,7 @@
         </div>
 
 
-        <div class="col-lg-7 col-md-8 col-sm-8 col-xs-12 ">
+        <div class="col-lg-9 col-md-8 col-sm-8 col-xs-12 ">
             {% block sort %}
                 {% include 'sort.html' %}
             {% endblock %}
@@ -77,12 +77,14 @@
 <div class="row">
 
 <div class="col-lg-7 col-md-8 col-sm-8 col-xs-12 text-center col-lg-offset-4 col-md-offset-4 col-sm-offset-4">
-<span class="col-lg-3 col-md-3 col-sm-3 col-xs-3 total">Total: <strong> {{ lots.total }} </strong></span>
-<span class="col-lg-7 col-md-7 col-sm-7 col-xs-7">
-{% with page_name='index' %}
-{% include 'pagination.html' %}
-{% endwith %}
-</span>
+<div class="row">
+    <span class="col-lg-3 col-md-3 col-sm-3 col-xs-3 total">Total: <strong> {{ lots.total }} </strong></span>
+    <span class="col-lg-7 col-md-7 col-sm-7 col-xs-7">
+    {% with page_name='index' %}
+    {% include 'pagination.html' %}
+    {% endwith %}
+    </span>
+</div>
 </div>
 
 {% endblock %}

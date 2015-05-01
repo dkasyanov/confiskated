@@ -1,11 +1,11 @@
-body{
-    padding: 0;
-    margin-left: -29px;
-}
+
 .content {
     clear: both;
-    max-width: 960px;
+    max-width: 960px !important;
     margin: 0 auto;
+}
+.content *{
+    max-width: 960px !important;
 }
 
 .leftbar {

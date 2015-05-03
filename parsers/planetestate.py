@@ -3,9 +3,9 @@ __author__ = 'dkasyanov'
 
 import requests
 import lxml.html
-from app.models import Lot, Address, Country, Region, City, Type, Square, Bank
 from datetime import datetime
 from app import db
+from app.db_lib import *
 
 
 base_url = "http://planetestate.com.ua/estate/sell"
@@ -178,57 +178,7 @@ def update_data():
             db.session.commit()
 
 
-def get_type(data):
-    t = Type.query.filter_by(name=data).first()
-    if not t:
-        new_type = Type(name=data)
-        db.session.add(new_type)
-        db.session.commit()
-        return new_type
-    return t
 
-
-def get_country(country_name):
-    country = Country.query.filter_by(name=country_name).first()
-    if not country:
-        new_country = Country(name=country_name)
-        db.session.add(new_country)
-        db.session.commit()
-        return new_country
-    return country
-
-
-def get_region(region_name, country):
-    region = Region.query.filter_by(name=region_name, country_id=country.id).first()
-    if not region:
-        new_region = Region(name=region_name, country_id=country.id)
-        db.session.add(new_region)
-        db.session.commit()
-        return new_region
-    return region
-
-
-def get_city(city_name, region):
-    city = City.query.filter_by(name=city_name, region_id=region.id).first()
-    if not city:
-        new_city = City(name=city_name, region_id=region.id)
-        db.session.add(new_city)
-        db.session.commit()
-        return new_city
-    return city
-
-
-def get_address(country, region, city, street='', other=''):
-    address = Address.query.filter_by(country_id=country.id, region_id=region.id, city_id=city.id, street=street, other=other).first()
-    if not address:
-        new_address = Address(country=country, country_id=country.id,
-                              region=region, region_id=region.id,
-                              city=city, city_id=city.id,
-                              street=street, other=other)
-        db.session.add(new_address)
-        db.session.commit()
-        return new_address
-    return address
 
 
 
@@ -237,4 +187,5 @@ def get_address(country, region, city, street='', other=''):
 # db.session.add(lot)
 # db.session.commit()
 
-update_data()
+if __name__ == '__main__':
+    update_data()

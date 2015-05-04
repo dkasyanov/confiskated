@@ -28,20 +28,19 @@ def get_lots_links():
     page_index = 1
     data = list()
 
-    try:
-        r = requests.get((page_url_template % page_index), headers=headers)
-        r.encoding = "UTF-8"
-        document = lxml.html.document_fromstring(r.text)
-        document.make_links_absolute(base_url)
-        objects = document.body.cssselect('.obj')
-        for obj in objects:
-            data.append(obj.cssselect('.img')[0].get('href'))
-    except requests.ConnectionError:
-        print "Can't connect to " + SOURCE
-        return data
+    # try:
+    #     r = requests.get((page_url_template % page_index), headers=headers)
+    #     r.encoding = "UTF-8"
+    #     document = lxml.html.document_fromstring(r.text)
+    #     document.make_links_absolute(base_url)
+    #     objects = document.body.cssselect('.obj')
+    #     for obj in objects:
+    #         data.append(obj.cssselect('.img')[0].get('href'))
+    # except requests.ConnectionError:
+    #     print "Can't connect to " + SOURCE
+    #     return data
 
-    while not is_last_page(r.text):
-        page_index += 1
+    while True:
         try:
             r = requests.get((page_url_template % page_index), headers=headers)
             r.encoding = "UTF-8"
@@ -50,9 +49,13 @@ def get_lots_links():
             objects = document.body.cssselect('.obj')
             for obj in objects:
                 data.append(obj.cssselect('.img')[0].get('href'))
+            page_index += 1
         except requests.ConnectionError:
             print "Can't connect to " + str(page_url_template % page_index)
+            page_index += 1
             continue
+        if is_last_page(r.text):
+            break
     return data
 
 
@@ -70,8 +73,6 @@ def parse_lot(page):
         obj = doc.body.cssselect("#objInfo")[0]
         lot.source_id = int(page.split('/')[-1])
         lot.link = unicode(page)
-        lot.type = get_type(unicode(obj.cssselect("#objInfo>h1")[0].text.split(u'Продается ')[1].strip()))
-        lot.type_id = lot.type.id
         address_string = obj.cssselect("#objInfo>h1>span")[0].text_content().strip().replace("  ", " ").replace("\n", " ")
         country = get_country(u'Украина')
         if u',' in address_string:
@@ -85,6 +86,14 @@ def parse_lot(page):
             street = unicode(address_string.split(',')[1].strip())
         lot.address = get_address(country=country, region=region, city=city, street=street)
         lot.address_id = lot.address.id
+        if obj.cssselect("#objInfo>h1")[0].text.split(u'Продается ')[1].strip() == u'':
+            if u'кв.' in address_string:
+                lot.type = get_type(u'Квартира')
+            else:
+                lot.type = get_type(u'Жилой дом')
+        else:
+            lot.type = get_type(unicode(obj.cssselect("#objInfo>h1")[0].text.split(u'Продается ')[1].strip()))
+        lot.type_id = lot.type.id
         main_features = obj.cssselect(".objFeatures>table")
         trs = dict()
         for table in main_features:
@@ -156,8 +165,12 @@ def update_data():
     bank.name = u'ПриватБанк'
     bank.website = u'http://privatbank.ua'
     bank.logo = u'https://privatbank.ua/img/logo.png'
+    bank = get_or_create_bank(bank)
     lot_links = get_lots_links()
     # lot_links = ['http://planetestate.com.ua/estate/8505']
+    updated = 0
+    added = 0
+
     for lot in lot_links:
         lot_id = int(lot.split('/')[-1])
         curr_date = datetime.utcnow()
@@ -171,11 +184,15 @@ def update_data():
             lot_db.date = curr_date
             db.session.merge(lot_db)
             db.session.commit()
+            updated += 1
         else:
             print "lot %d added to db" % lot_parsed.source_id
             lot_parsed.date = curr_date
             db.session.add(lot_parsed)
             db.session.commit()
+            added += 1
+
+    print "added: " + str(added) + " | updated: " + str(updated)
 
 
 

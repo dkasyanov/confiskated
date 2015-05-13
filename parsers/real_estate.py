@@ -79,9 +79,9 @@ def parse_lot(page, region, city):
             if type_parsed == u'Дом':
                 type_parsed = u'Жилой дом'
             lot['type'] = type_parsed
-        country = u'Украина'
-        region = region
-        city = city
+        lot['country'] = u'Украина'
+        lot['region'] = region
+        lot['city'] = city
         address_string = obj.cssselect(".mp-info>ul>li")[0].text_content()
         street = None
         if u'Адрес:' in address_string:

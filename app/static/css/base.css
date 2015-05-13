@@ -88,3 +88,14 @@
 .green {
     color: green;
 }
+
+.filters {
+    min-width: 100px !important;
+    background-color: #cbffbe;
+}
+input, select {
+    margin: 5px;
+}
+.form-inline input{
+    width: 70px !important;
+}

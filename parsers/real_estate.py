@@ -19,6 +19,15 @@ street_prefixes = [u'ул.', u'пр.', u'проезд', u'переулок', u'�
                    u'улица', u'ж/м', u'бульвар', u'п-т', u'ул ', u'пл', u'пос.']
 
 
+def get_bank():
+    bank = Bank()
+    bank.name = u'ПУМБ'
+    bank.website = u'http://pumb.ua/'
+    bank.logo = u'https://online.pumb.ua/Pages/Login/img/logo/ib_logo.gif'
+    bank = get_or_create_bank(bank)
+    return bank
+
+
 def get_lots_links():
     page_url_templates = ["http://pumb.ua/ru/collateral/real_estate/?PAGEN_1=%d", "http://pumb.ua/ru/collateral/commercial_estate/?PAGEN_1=%d"]
 
@@ -35,13 +44,13 @@ def get_lots_links():
                 for obj in objects:
                     if len(obj.cssselect('b>a')):
                         link = obj.cssselect('b>a')[0].get('href')
-                        region = obj.cssselect('.adr')[0].text.split(',')[0]
-                        city = obj.cssselect('.adr')[0].text.split(',')[1]
+                        region = obj.cssselect('.adr')[0].text.split(',')[0].strip()
+                        city = obj.cssselect('.adr')[0].text.split(',')[1].strip()
                         if u'Крым' in region:
                             region = u'Крым'
                         else:
                             region += u' область'
-                        data.append((link, region, city))
+                        data.append((link, region, city, BANK))
                 page_index += 1
             except requests.ConnectionError:
                 print "Can't connect to " + str(page % page_index)
@@ -72,7 +81,6 @@ def parse_address_string(address_string, region, country):
 
 
 def parse_lot(page, region, city):
-    print page
     try:
         r = requests.get(page, headers=headers)
         r.encoding = "UTF-8"
@@ -81,22 +89,22 @@ def parse_lot(page, region, city):
             return None
         doc = lxml.html.document_fromstring(r.text)
         doc.make_links_absolute(base_url)
-        lot = Lot()
+        lot = {}
 
         obj = doc.body.cssselect(".mortgaged-property-inside")[0]
-        lot.source_id = int(page.split('/')[-2].replace('_', '').replace('-', ''))
-        lot.link = unicode(page)
+        lot['source_id'] = int(page.split('/')[-2].replace('_', '').replace('-', ''))
+        lot['link'] = unicode(page)
         if unicode(u'Коммерческая недвижимость') in doc.body.cssselect("#page-title")[0].text:
-            lot.type = get_type(u'Коммерческая недвижимость')
+            lot['type'] = u'Коммерческая недвижимость'
         else:
             type_parsed = unicode(obj.cssselect("#fototitle")[0].text.strip())
             if type_parsed == u'Дом':
                 type_parsed = u'Жилой дом'
-            lot.type = get_type(type_parsed)
-        lot.type_id = lot.type.id
-        country = get_country(u'Украина')
-        region = get_region(region, country)
-        city = get_city(city, region)
+            lot['type'] = type_parsed
+        #lot.type_id = lot.type.id
+        country = u'Украина'
+        region = region
+        city = city
         address_string = obj.cssselect(".mp-info>ul>li")[0].text_content()
         street = None
         if u'Адрес:' in address_string:
@@ -111,47 +119,43 @@ def parse_lot(page, region, city):
         else:
             print "Error: Can't find street: " + address_string
             street = u''
-        lot.address = get_address(country=country, region=region, city=city, street=street)
-        lot.address_id = lot.address.id
+        #lot.address = get_address(country=country, region=region, city=city, street=street)
+        #lot.address_id = lot.address.id
+        lot['street'] = street
         main_features = obj.cssselect(".mp-properties>table")
         trs = dict()
         for table in main_features:
             for tr in table.cssselect("tr"):
                 children = tr.getchildren()
                 trs[children[0].text] = children[1].text
-        # if u'Тип недвижимости' in trs:
-        #     if trs[u'Тип недвижимости'] == u'Дом':
-        #         trs[u'Тип недвижимости'] = u'Жилой дом'
-        #     lot.type = get_type(unicode(trs[u'Тип недвижимости']))
-        #     lot.type_id = lot.type.id
         if u'Кол-во комнат' in trs:
-            lot.rooms = int(trs[u'Кол-во комнат'])
+            lot['rooms'] = int(trs[u'Кол-во комнат'])
         if u'Этаж' in trs:
             if u'Всего этажей' in trs:
-                lot.level = unicode(trs[u'Этаж'] + '/' + trs[u'Всего этажей'])
+                lot['level'] = unicode(trs[u'Этаж'] + '/' + trs[u'Всего этажей'])
             else:
-                lot.level = unicode(trs[u'Этаж'])
+                lot['level'] = unicode(trs[u'Этаж'])
         if u'Год постройки' in trs:
-            lot.build_year = unicode(trs[u'Год постройки'])
-        squares = Square()
+            lot['build_year'] = unicode(trs[u'Год постройки'])
+        squares = dict()
         if u'Общая площадь' in trs:
-            squares.common = float(trs[u'Общая площадь'].split()[0].split(' ')[0])
+            squares['common'] = float(trs[u'Общая площадь'].split()[0].split(' ')[0])
         if u'Жилая площадь' in trs:
-            squares.living = float(trs[u'Жилая площадь'].split(' ')[0])
+            squares['living'] = float(trs[u'Жилая площадь'].split(' ')[0])
         if u'Площадь кухни' in trs:
-            squares.kitchen = float(trs[u'Площадь кухни'].split(' ')[0])
+            squares['kitchen'] = float(trs[u'Площадь кухни'].split(' ')[0])
         if u'Площадь с/у' in trs:
             if u'/' in trs[u'Площадь с/у'].split(' ')[0]:
-                squares.bathroom = float(trs[u'Площадь с/у'].split(' ')[0].split('/')[0])
-                squares.toilet = float(trs[u'Площадь с/у'].split(' ')[0].split('/')[1])
+                squares['bathroom'] = float(trs[u'Площадь с/у'].split(' ')[0].split('/')[0])
+                squares['toilet'] = float(trs[u'Площадь с/у'].split(' ')[0].split('/')[1])
             else:
-                squares.wc = float(trs[u'Площадь с/у'].split(' ')[0])
+                squares['wc'] = float(trs[u'Площадь с/у'].split(' ')[0])
         if u'Площадь земли' in trs:
-            squares.territory = float(trs[u'Площадь земли'].split(' ')[0])
+            squares['territory'] = float(trs[u'Площадь земли'].split(' ')[0])
         if squares:
-            squares = get_square(squares)
-            lot.square = squares
-            lot.square_id = squares.id
+            #squares = get_square(squares)
+            lot['square'] = squares
+            #lot.square_id = squares.id
         communications = dict()
         if u'Водоснабжение' in trs:
             communications[u'water'] = unicode(trs[u'Водоснабжение'])
@@ -160,42 +164,37 @@ def parse_lot(page, region, city):
         if u'Коммуникации' in trs:
             communications[u'other'] = unicode(trs[u'Коммуникации'])
         if communications:
-            lot.communications = communications
+            lot['communications'] = communications
         photos = []
         if len(obj.cssselect('.mp-gallery')) > 0:
             for element, attribute, link, pos in obj.cssselect('.mp-gallery')[0].iterlinks():
                 if "jpg" in link and "resize" not in link:
                     photos.append(unicode(link))
         if photos:
-            lot.photo = photos
-        lot.price = int(obj.cssselect('.txt>b')[0].text.split(u' грн')[0].strip().replace(u"\xa0", u"").split(u'.')[0].replace(' ', ''))
-        lot.description = unicode(obj.cssselect('.mp-info>ul>li')[1].xpath('./text()')[-1].strip())
-        lot.date = datetime.utcnow()
-        lot.source = SOURCE
-        lot.bank = bank
-        lot.bank_id = bank.id
+            lot['photo'] = photos
+        lot['price'] = int(obj.cssselect('.txt>b')[0].text.split(u' грн')[0].strip().replace(u"\xa0", u"").split(u'.')[0].replace(' ', ''))
+        lot['description'] = unicode(obj.cssselect('.mp-info>ul>li')[1].xpath('./text()')[-1].strip())
+        #lot['date'] = datetime.utcnow()
+        lot['source'] = SOURCE
+        #lot.bank = bank
+        #lot.bank_id = bank.id
         return lot
-    except requests.ConnectionError:
+    except requests.ConnectionError, e:
         print "Error parsing %s" % page
+        print e
         return None
 
 
 def update_data():
-    global bank
-    bank = Bank()
-    bank.name = u'ПУМБ'
-    bank.website = u'http://pumb.ua/'
-    bank.logo = u'https://online.pumb.ua/Pages/Login/img/logo/ib_logo.gif'
-    bank = get_or_create_bank(bank)
     # lot_links = ['http://pumb.ua/ru/collateral/real_estate/4734/']
 
     updated = 0
     added = 0
-    for lot, region, city in get_lots_links():
+    for lot, region, city, bank in get_lots_links():
         lot_id = int(lot.split('/')[-2].replace('-', '').replace('_', ''))
         curr_date = datetime.utcnow()
         lot_db = Lot.query.filter_by(source_id=lot_id, source=SOURCE).first()
-        lot_parsed = parse_lot(lot, region, city)
+        lot_parsed = parse_lot(lot, region, city, bank)
         if not lot_parsed:
             continue
 

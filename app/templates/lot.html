@@ -24,13 +24,13 @@
         </a>
         <span class="common_info">
             {% if lot.level %}
-                <label>Level:</label> <span>{{ lot.level }}</span><br>
+                <label>Этаж:</label> <span>{{ lot.level }}</span><br>
             {% endif %}
             {% if lot.rooms != -1 %}
-            <label>Rooms:</label> <span>{{ lot.rooms }}</span><br>
+            <label>Комнат:</label> <span>{{ lot.rooms }}</span><br>
             {% endif %}
             {% if lot.square and lot.square.common %}
-                <label>Square(m<sup>2</sup>):</label> {{ lot.square.common }}
+                <label>Площадь(м<sup>2</sup>):</label> {{ lot.square.common }}
                 {% if lot.square.living %}
                     / {{ lot.square.living }}
                 {% endif %}
@@ -39,14 +39,14 @@
         </div>
         <div class="col-lg-4 col-md-12 col-sm-8 col-xs-4 tab right">
             <label style="margin-left: 40px">
-                Price:
+                Цена:
                 <strong class="price"> {{ '{0:,}'.format(lot.price) }} </strong>
-                UAH</label>
+            </label>
             {% if lot.price_credit %}
-            <label style="margin-left: 40px">Price credit: {{ '{0:,}'.format(lot.price_credit) }} UAH</label>
+            <label style="margin-left: 40px">В кредит: {{ '{0:,}'.format(lot.price_credit) }}</label>
             {% endif %}
             {% if lot.price_rent %}
-            <label style="margin-left: 40px">Price rent: {{ lot.price_rent }} UAH</label>
+            <label style="margin-left: 40px">Аренда: {{ lot.price_rent }}</label>
             {% endif %}
         </div>
     </div>

@@ -58,7 +58,7 @@ class Photo(db.Model):
 class Bank(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120))
-    website = db.Column(db.String(120))
+    website = db.Column(db.String(120), unique=True)
     logo = db.Column(db.String(256))
 
 

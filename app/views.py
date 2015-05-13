@@ -12,7 +12,7 @@ import json
 @app.route('/index', methods=['POST', 'GET'])
 @app.route('/index/<int:page>', methods=['POST', 'GET'])
 def index(page=1):
-    session['form_filter'] = None
+    sort = request.args.get('sort', 'disable')
     form = FiltersForm()
     regions = [(u'0', u'Вся Украина')]
     cities = [(u'0', u'Все города')]
@@ -33,15 +33,22 @@ def index(page=1):
         filter_action(form)
         return redirect(url_for('filter'))
 
-    lots = sort_lots(lots).paginate(page, per_page=LOTS_PER_PAGE, error_out=True)
+    if sort == 'asc':
+        lots = lots.order_by(Lot.price)
+    elif sort == 'desc':
+        lots = lots.order_by(Lot.price.desc())
+
+    lots = lots.paginate(page, per_page=LOTS_PER_PAGE, error_out=True)
     return render_template('index.html',
                            lots=lots,
-                           form=form)
+                           form=form,
+                           sort=sort)
 
 
 @app.route('/filter', methods=['GET', 'POST'])
 @app.route('/filter/<int:page>', methods=['GET', 'POST'])
 def filter(page=1):
+    sort = request.args.get('sort', 'disable')
     data = json.loads(session['form_filter'])
     form = FiltersForm()
     if form.is_submitted():
@@ -100,38 +107,23 @@ def filter(page=1):
         form.room3.default = 3 if 3 in rr else 0
         form.room4.default = 4 if 4 in rr else 0
 
-    lots = sort_lots(lots).paginate(page, per_page=LOTS_PER_PAGE, error_out=True)
+    if sort == 'asc':
+        lots = lots.order_by(Lot.price)
+    elif sort == 'desc':
+        lots = lots.order_by(Lot.price.desc())
+
+    lots = lots.paginate(page, per_page=LOTS_PER_PAGE, error_out=True)
     form.process()
     return render_template('filter.html',
                            lots=lots,
-                           form=form)
+                           form=form,
+                           sort=sort)
 
 
 @app.route('/get_cities', methods=['POST'])
 def get_cities():
     cities = sorted([(i.name, i.id) for i in City.query.filter_by(region_id=int(request.form['region'])).order_by(City.name).all()])
     return jsonify(cities)
-
-
-@app.route('/sort_by', methods=['POST'])
-def sort_by():
-    session['sort_type'] = request.form['sort_type']
-    session['direction'] = request.form['sort_dir']
-    return jsonify([])
-
-
-def sort_lots(lots):
-    if session.get('sort_type', None) == 'price':
-        if session['direction'] == 'asc':
-            lots = lots.order_by(Lot.price)
-        else:
-            lots = lots.order_by(Lot.price.desc())
-    elif session.get('sort_type', None) == 'date':
-        if session['direction'] == 'asc':
-            lots = lots.order_by(Lot.date)
-        else:
-            lots = lots.order_by(Lot.date.desc())
-    return lots
 
 
 def filter_action(form):

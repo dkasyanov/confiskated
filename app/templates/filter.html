@@ -65,7 +65,6 @@
             {% block sort %}
                 {% include 'sort.html' %}
             {% endblock %}
-            <div>{{ request.query_string }}</div>
 
             {% for lot in lots.items %}
                 {% include "lot.html" %}

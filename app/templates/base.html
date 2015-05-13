@@ -20,30 +20,16 @@
    		}
   </style>
     <script>
-        function sortBy(type) {
+        function sort() {
             var direction;
-            if (type == 'date')
-            {
-                if ($('#sortByDate').hasClass('glyphicon-sort-by-attributes'))
-                    direction = 'desc'
-                else
-                    direction = 'asc'
-            }
-            if (type == 'price')
-            {
+            if ($('#sortByPrice').hasClass('green')) {
                 if ($('#sortByPrice').hasClass('glyphicon-sort-by-attributes'))
-                    direction = 'desc'
+                    location.assign(self.location['href'].split('?')[0] + '?sort=desc');
                 else
-                    direction = 'asc'
+                    location.assign(self.location['href'].split('?')[0]);
+            } else {
+                location.assign(self.location['href'].split('?')[0] + '?sort=asc');
             }
-
-            $.post('/sort_by',
-                    {
-                        sort_type: type,
-                        sort_dir: direction
-                    }).done(function(){
-                        location.reload();
-                    })
         }
     </script>
 </head>

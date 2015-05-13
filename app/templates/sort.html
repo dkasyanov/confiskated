@@ -1,5 +1,17 @@
 <div class="sortbar text-right">
-    <label>Sort by:</label>
-    <a href="javascript:sortBy('date');" class="link"><label>Date <span class="glyphicon {% if session['sort_type'] == 'date' and session['direction'] == 'desc' %} glyphicon-sort-by-attributes-alt {% else %} glyphicon-sort-by-attributes {% endif %}" id="sortByDate"></span></label></a> |
-    <a href="javascript:sortBy('price');" class="link"><label>Price <span class="glyphicon {% if session['sort_type'] == 'price' and session['direction'] == 'desc' %} glyphicon-sort-by-attributes-alt {% else %} glyphicon-sort-by-attributes {% endif %}" id="sortByPrice"></span></label></a>&nbsp;
+    <label>Сортировка по:</label>
+    <a href="javascript:sort();" class="link">
+        <label>цене
+            <span class="glyphicon
+                {% if sort %}
+                    {% if sort == 'desc' %}
+                        glyphicon-sort-by-attributes-alt green
+                    {% elif sort == 'asc' %}
+                        glyphicon-sort-by-attributes green
+                    {% else %}
+                        glyphicon-sort-by-attributes
+                    {% endif %}
+                {% endif %}" id="sortByPrice">
+            </span>
+        </label></a>&nbsp;
 </div>

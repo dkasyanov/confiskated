@@ -100,3 +100,14 @@ class Lot(db.Model):
             if self.__getattribute__(attr) != other.__getattribute__(attr):
                 return False
         return True
+
+
+class Stats(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    ip = db.Column(db.String(32))
+    agent_platform = db.Column(db.String(64))
+    agent_browser = db.Column(db.String(64))
+    agent_browser_version = db.Column(db.String(64))
+    agent_lang = db.Column(db.String(64))
+    time = db.Column(db.DateTime)
+    referrer = db.Column(db.String(256))

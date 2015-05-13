@@ -4,8 +4,9 @@ from app import app, db
 from flask import render_template, redirect, url_for, request, g, session, jsonify
 from forms import FiltersForm
 from config import LOTS_PER_PAGE
-from models import Lot, Address, Type, Region, Country, City, Square, Bank
+from models import Lot, Address, Type, Region, Stats, City, Square, Bank
 import json
+from datetime import datetime
 
 
 @app.route('/', methods=['POST', 'GET'])
@@ -13,6 +14,7 @@ import json
 @app.route('/index/<int:page>', methods=['POST', 'GET'])
 def index(page=1):
     sort = request.args.get('sort', 'disable')
+    write_stats(request)
     form = FiltersForm()
     regions = [(u'0', u'Вся Украина')]
     cities = [(u'0', u'Все города')]
@@ -49,6 +51,7 @@ def index(page=1):
 @app.route('/filter/<int:page>', methods=['GET', 'POST'])
 def filter(page=1):
     sort = request.args.get('sort', 'disable')
+    write_stats(request)
     data = json.loads(session['form_filter'])
     form = FiltersForm()
     if form.is_submitted():
@@ -147,3 +150,17 @@ def filter_action(form):
                    'sf': square_from, 'st': square_to,
                    'rr': rr}
     session['form_filter'] = json.dumps(form_filter)
+
+
+def write_stats(request):
+    stats = Stats()
+    agent = request.user_agent
+    stats.agent_platform = agent.platform
+    stats.agent_browser = agent.browser
+    stats.agent_browser_version = agent.version
+    stats.agent_lang = agent.language
+    stats.ip = request.remote_addr
+    stats.referrer = request.referrer
+    stats.time = datetime.utcnow()
+    db.session.add(stats)
+    db.session.commit()

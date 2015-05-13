@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 __author__ = 'dkasyanov'
 
-
 import requests
 import lxml.html
 from app.db_lib import *
-from datetime import datetime
-from app import db
 
 
 base_url = "http://pumb.ua/ru/collateral/real_estate/"
@@ -61,25 +58,6 @@ def get_lots_links():
     return data
 
 
-def parse_address_string(address_string, region, country):
-    region = get_region(region, country)
-    if u'Адрес:' in address_string:
-            address_string = address_string.split(u'Адрес:')[1]
-            if u'обл.' in address_string:
-                address_string = address_string.split(u'обл.')[1]
-            if u'область' in address_string:
-                address_string = address_string.split(u'область')
-                city = get_city(address_string.split(',')[1].replace(u'г.', '').replace(u'с.', '').strip(), region)
-                street = unicode(address_string.split(address_string.split(',')[1].strip()+u', ')[-1])
-            else:
-                city = get_city(address_string.split(',')[0].replace(u'г.', '').replace(u'с.', '').strip(), region)
-                street = unicode(address_string.split(address_string.split(',')[0].strip()+u', ')[-1])
-    else:
-        region = get_region(region, country)
-        city = get_city('', region)
-        street = ''
-
-
 def parse_lot(page, region, city):
     try:
         r = requests.get(page, headers=headers)
@@ -101,7 +79,6 @@ def parse_lot(page, region, city):
             if type_parsed == u'Дом':
                 type_parsed = u'Жилой дом'
             lot['type'] = type_parsed
-        #lot.type_id = lot.type.id
         country = u'Украина'
         region = region
         city = city
@@ -119,8 +96,6 @@ def parse_lot(page, region, city):
         else:
             print "Error: Can't find street: " + address_string
             street = u''
-        #lot.address = get_address(country=country, region=region, city=city, street=street)
-        #lot.address_id = lot.address.id
         lot['street'] = street
         main_features = obj.cssselect(".mp-properties>table")
         trs = dict()
@@ -153,9 +128,7 @@ def parse_lot(page, region, city):
         if u'Площадь земли' in trs:
             squares['territory'] = float(trs[u'Площадь земли'].split(' ')[0])
         if squares:
-            #squares = get_square(squares)
             lot['square'] = squares
-            #lot.square_id = squares.id
         communications = dict()
         if u'Водоснабжение' in trs:
             communications[u'water'] = unicode(trs[u'Водоснабжение'])
@@ -174,45 +147,9 @@ def parse_lot(page, region, city):
             lot['photo'] = photos
         lot['price'] = int(obj.cssselect('.txt>b')[0].text.split(u' грн')[0].strip().replace(u"\xa0", u"").split(u'.')[0].replace(' ', ''))
         lot['description'] = unicode(obj.cssselect('.mp-info>ul>li')[1].xpath('./text()')[-1].strip())
-        #lot['date'] = datetime.utcnow()
         lot['source'] = SOURCE
-        #lot.bank = bank
-        #lot.bank_id = bank.id
         return lot
     except requests.ConnectionError, e:
         print "Error parsing %s" % page
         print e
         return None
-
-
-def update_data():
-    # lot_links = ['http://pumb.ua/ru/collateral/real_estate/4734/']
-
-    updated = 0
-    added = 0
-    for lot, region, city, bank in get_lots_links():
-        lot_id = int(lot.split('/')[-2].replace('-', '').replace('_', ''))
-        curr_date = datetime.utcnow()
-        lot_db = Lot.query.filter_by(source_id=lot_id, source=SOURCE).first()
-        lot_parsed = parse_lot(lot, region, city, bank)
-        if not lot_parsed:
-            continue
-
-        if lot_parsed.compare(lot_db):
-            print "lot %d updated" % lot_db.source_id
-            lot_db.date = curr_date
-            db.session.merge(lot_db)
-            db.session.commit()
-            updated += 1
-        else:
-            print "lot %d added to db" % lot_parsed.source_id
-            lot_parsed.date = curr_date
-            db.session.add(lot_parsed)
-            db.session.commit()
-            added += 1
-
-    print "added: " + str(added) + " | updated: " + str(updated)
-
-
-if __name__ == '__main__':
-    update_data()

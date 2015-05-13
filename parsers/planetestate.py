@@ -3,8 +3,6 @@ __author__ = 'dkasyanov'
 
 import requests
 import lxml.html
-from datetime import datetime
-from app import db
 from app.db_lib import *
 
 
@@ -14,13 +12,6 @@ headers = {
 }
 SOURCE = u'www.planetestate.com.ua'
 BANK = u'ПриватБанк'
-
-
-def is_last_page(data):
-    doc = lxml.html.document_fromstring(data)
-    if doc.body.cssselect('.paging>a')[-1].text == u"→":
-        return False
-    return True
 
 
 def get_bank():
@@ -51,7 +42,7 @@ def get_lots_links():
             print "Can't connect to " + str(page_url_template % page_index)
             page_index += 1
             continue
-        if is_last_page(r.text):
+        if not document.body.cssselect('.paging>a')[-1].text == u"→":
             break
     return data
 
@@ -81,8 +72,6 @@ def parse_lot(page):
         lot['street'] = ''
         if len(address_string.split(',')) == 3:
             lot['street'] = unicode(address_string.split(',')[1].strip())
-        # lot.address = get_address(country=country, region=region, city=city, street=street)
-        # lot.address_id = lot.address.id
         if obj.cssselect("#objInfo>h1")[0].text.split(u'Продается ')[1].strip() == u'':
             if u'кв.' in address_string:
                 lot['type'] = u'Квартира'
@@ -90,7 +79,6 @@ def parse_lot(page):
                 lot['type'] = u'Жилой дом'
         else:
             lot['type'] = unicode(obj.cssselect("#objInfo>h1")[0].text.split(u'Продается ')[1].strip())
-        # lot.type_id = lot.type.id
         main_features = obj.cssselect(".objFeatures>table")
         trs = dict()
         for table in main_features:
@@ -120,7 +108,6 @@ def parse_lot(page):
             squares['territory'] = float(trs[u'Площадь земли'].split(' ')[0])
         if squares:
             lot['square'] = squares
-            # lot.square_id = squares.id
         communications = dict()
         if u'Водоснабжение' in trs:
             communications[u'water'] = unicode(trs[u'Водоснабжение'])
@@ -146,57 +133,9 @@ def parse_lot(page):
         description = obj.cssselect('.objFeatures>h2')
         if description and len(description) > 1 and description[1].text_content() == u'Описание объекта':
             lot['description'] = unicode(obj.cssselect('.objFeatures')[0].xpath('./text()')[-1].strip())
-        #lot.date = datetime.utcnow()
         lot['source'] = SOURCE
-        # lot.bank = bank
-        # lot.bank_id = bank.id
         return lot
     except requests.ConnectionError, e:
         print "Error parsing %s" % page
         print e
         return None
-
-
-def update_data():
-    lot_links = get_lots_links()
-    # lot_links = ['http://planetestate.com.ua/estate/8505']
-    updated = 0
-    added = 0
-
-    for lot, region, city, bank_obj in lot_links:
-        lot_id = int(lot.split('/')[-1])
-        curr_date = datetime.utcnow()
-        lot_db = Lot.query.filter_by(source_id=lot_id, source=SOURCE).first()
-        lot_parsed = parse_lot(lot, bank_obj)
-        if not lot_parsed:
-            continue
-
-        if lot_parsed.compare(lot_db):
-            print "lot %d updated" % lot_db.source_id
-            lot_db.date = curr_date
-            db.session.merge(lot_db)
-            db.session.commit()
-            updated += 1
-        else:
-            print "lot %d added to db" % lot_parsed.source_id
-            lot_parsed.date = curr_date
-            db.session.add(lot_parsed)
-            db.session.commit()
-            added += 1
-
-    print "added: " + str(added) + " | updated: " + str(updated)
-
-
-
-
-
-
-
-# lot = parse_lot('http://planetestate.com.ua/estate/8505')
-# db.session.add(lot)
-# db.session.commit()
-
-if __name__ == '__main__':
-    #update_data()
-    parse_lot(u'http://planetestate.com.ua/estate/6503')
-

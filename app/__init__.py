@@ -13,5 +13,4 @@ db = SQLAlchemy(app)
 engine = create_engine(SQLALCHEMY_DATABASE_URI, convert_unicode=True)
 db_session = scoped_session(sessionmaker(bind=engine), scopefunc=_app_ctx_stack.__ident_func__)
 
-
 from app import views

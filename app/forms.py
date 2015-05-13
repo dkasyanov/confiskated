@@ -1,6 +1,6 @@
 __author__ = 'dkasyanov'
 from flask.ext.wtf import Form
-from wtforms import SelectField, StringField, BooleanField, FloatField, IntegerField
+from wtforms import SelectField, BooleanField, FloatField, IntegerField
 
 
 class FiltersForm(Form):

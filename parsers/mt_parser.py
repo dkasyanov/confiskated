@@ -12,6 +12,7 @@ from app import db_session
 from datetime import datetime
 from app.db_lib import *
 
+
 queue = Queue.Queue()
 LOCK = threading.RLock()
 global updated
@@ -57,19 +58,19 @@ def write_to_db(lot, region, city, bank_obj):
     lot_parsed = Lot()
     lot_parsed.source_id = lot.get('source_id')
     lot_parsed.link = lot.get('link')
-    lot_parsed.type = get_type(lot.get('type'))
-    country = get_country(lot.get('country'))
+    lot_parsed.type = get_or_create_type(lot.get('type'))
+    country = get_or_create_country(lot.get('country'))
     if lot.get('region'):
-        region = get_region(lot.get('region'), country)
+        region = get_or_create_region(lot.get('region'), country)
     else:
-        region = get_region(region, country)
+        region = get_or_create_region(region, country)
     session.add(region)
     if lot.get('city'):
-        city = get_city(lot.get('city'), region)
+        city = get_or_create_city(lot.get('city'), region)
     else:
-        city = get_city(city, region)
+        city = get_or_create_city(city, region)
     session.add(city)
-    lot_parsed.address = get_address(country, region, city, lot.get('street'), lot.get('other'))
+    lot_parsed.address = get_or_create_address(country, region, city, lot.get('street'), lot.get('other'))
     squares = Square()
     session.add(squares)
     squares.bathroom = lot.get('bathroom')
@@ -79,7 +80,7 @@ def write_to_db(lot, region, city, bank_obj):
     squares.territory = lot.get('territory')
     squares.toilet = lot.get('toilet')
     squares.wc = lot.get('wc')
-    lot_parsed.square = get_square(squares)
+    lot_parsed.square = get_or_create_square(squares)
     lot_parsed.communications = lot.get('communications')
     lot_parsed.rooms = lot.get('rooms')
     lot_parsed.level = lot.get('level')

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 __author__ = 'dkasyanov'
 
-from app.models import Lot, Address, Country, Region, City, Type, Square, Bank
+from app.models import Address, Country, Region, City, Type, Square, Bank
 from app import db_session
 
 
-def get_type(data):
+def get_or_create_type(data):
     session = db_session()
     t = session.query(Type).filter_by(name=data).first()
     if not t:
@@ -20,7 +20,7 @@ def get_type(data):
     return t
 
 
-def get_country(country_name):
+def get_or_create_country(country_name):
     session = db_session()
     country = session.query(Country).filter_by(name=country_name).first()
     if not country:
@@ -35,7 +35,7 @@ def get_country(country_name):
     return country
 
 
-def get_region(region_name, country):
+def get_or_create_region(region_name, country):
     session = db_session()
     session.add(country)
     region = session.query(Region).filter_by(name=region_name, country_id=country.id).first()
@@ -51,7 +51,7 @@ def get_region(region_name, country):
     return region
 
 
-def get_city(city_name, region):
+def get_or_create_city(city_name, region):
     session = db_session()
     city = session.query(City).filter_by(name=city_name, region_id=region.id).first()
     if not city:
@@ -66,7 +66,7 @@ def get_city(city_name, region):
     return city
 
 
-def get_address(country, region, city, street='', other=''):
+def get_or_create_address(country, region, city, street='', other=''):
     session = db_session()
     session.add(country)
     session.add(region)
@@ -87,11 +87,12 @@ def get_address(country, region, city, street='', other=''):
     return address
 
 
-def get_square(square):
+def get_or_create_square(square):
     session = db_session()
     sq = session.query(Square).filter_by(common=square.common, living=square.living,
-                                kitchen=square.kitchen, bathroom=square.bathroom,
-                                toilet=square.toilet, wc=square.wc, territory=square.territory).first()
+                                         kitchen=square.kitchen, bathroom=square.bathroom,
+                                         toilet=square.toilet, wc=square.wc,
+                                         territory=square.territory).first()
     if not sq:
         session.add(square)
         session.commit()

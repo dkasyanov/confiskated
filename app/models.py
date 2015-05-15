@@ -109,5 +109,6 @@ class Stats(db.Model):
     agent_browser = db.Column(db.String(64))
     agent_browser_version = db.Column(db.String(64))
     agent_lang = db.Column(db.String(64))
-    time = db.Column(db.DateTime)
+    time = db.Column(db.Time)
+    date = db.Column(db.DateTime)
     referrer = db.Column(db.String(256))

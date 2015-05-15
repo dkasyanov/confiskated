@@ -7,6 +7,7 @@ from config import LOTS_PER_PAGE
 from models import Lot, Address, Type, Region, Stats, City, Square, Bank
 import json
 from datetime import datetime
+import flot
 
 
 @app.route('/', methods=['POST', 'GET'])
@@ -129,6 +130,20 @@ def get_cities():
     return jsonify(cities)
 
 
+@app.route('/statistics')
+def statistics():
+    dates = Stats.query.group_by(Stats.date).limit(7).all()
+    unique_users = []
+    for date in dates:
+        unique_users.append((date.date.strftime("%B %d, %Y"), Stats.query.filter_by(date=date.date).group_by(Stats.ip).count()))
+    if not unique_users:
+        unique_users = [(datetime.utcnow().date().strftime("%B %d, %Y"), 0)]
+
+    series = flot.Series(unique_users)
+    visits_graph = flot.Graph([series, ])
+    return render_template('statistics.html', data=visits_graph)
+
+
 def filter_action(form):
     region_id = (int(form.regionSelector.data) if int(form.regionSelector.data) > 0 else None)
     city_id = (int(form.citySelector.data) if int(form.citySelector.data) > 0 else None)
@@ -161,6 +176,7 @@ def write_stats(request):
     stats.agent_lang = agent.language
     stats.ip = request.remote_addr
     stats.referrer = request.referrer
-    stats.time = datetime.utcnow()
+    stats.time = datetime.utcnow().time()
+    stats.date = datetime.utcnow().date()
     db.session.add(stats)
     db.session.commit()

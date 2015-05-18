@@ -12,7 +12,7 @@ import flot
 
 @app.route('/', methods=['POST', 'GET'])
 @app.route('/index', methods=['POST', 'GET'])
-@app.route('/index/<int:page>', methods=['POST', 'GET'])
+@app.route(u'/index/<int:page>', methods=['POST', 'GET'])
 def index(page=1):
     sort = request.args.get('sort', None)
     write_stats(request)
@@ -36,8 +36,6 @@ def index(page=1):
         filter_action(form)
         return redirect(url_for('filter'))
 
-    if sort:
-        page = 1
     if sort == 'asc':
         lots = lots.order_by(Lot.price)
     elif sort == 'desc':
@@ -113,8 +111,6 @@ def filter(page=1):
         form.room3.default = 3 if 3 in rr else 0
         form.room4.default = 4 if 4 in rr else 0
 
-    if sort:
-        page = 1
     if sort == 'asc':
         lots = lots.order_by(Lot.price)
     elif sort == 'desc':

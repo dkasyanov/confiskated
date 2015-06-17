@@ -144,6 +144,10 @@ def statistics():
     return render_template('statistics.html', data=visits_graph)
 
 
+@app.route('/about')
+def about():
+    return render_template("about.html")
+
 def filter_action(form):
     region_id = (int(form.regionSelector.data) if int(form.regionSelector.data) > 0 else None)
     city_id = (int(form.citySelector.data) if int(form.citySelector.data) > 0 else None)

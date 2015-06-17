@@ -99,3 +99,11 @@ input, select {
 .form-inline input{
     width: 70px !important;
 }
+#form_feedback{
+    max-width: 500px !important;
+    margin: 0 auto;
+}
+textarea{
+    resize: none;
+    height: 150px !important;
+}

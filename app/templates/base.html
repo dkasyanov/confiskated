@@ -13,13 +13,17 @@
     <script>
         function sort() {
             var direction;
+            var current_location = self.location['href'].split('?')[0]
+            var page = current_location.match(/\d+/g)
+            if (page.length > 5)
+                    current_location = current_location.replace(new RegExp(page[5] + '$'), "1")
             if ($('#sortByPrice').hasClass('green')) {
                 if ($('#sortByPrice').hasClass('glyphicon-sort-by-attributes'))
-                    location.assign(self.location['href'].split('?')[0] + '?sort=desc');
+                    location.assign(current_location + '?sort=desc');
                 else
-                    location.assign(self.location['href'].split('?')[0]);
+                    location.assign(current_location);
             } else {
-                location.assign(self.location['href'].split('?')[0] + '?sort=asc');
+                location.assign(current_location + '?sort=asc');
             }
         }
     </script>

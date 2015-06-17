@@ -12,9 +12,9 @@ import flot
 
 @app.route('/', methods=['POST', 'GET'])
 @app.route('/index', methods=['POST', 'GET'])
-@app.route('/index/<int:page>', methods=['POST', 'GET'])
+@app.route(u'/index/<int:page>', methods=['POST', 'GET'])
 def index(page=1):
-    sort = request.args.get('sort', 'disable')
+    sort = request.args.get('sort', None)
     write_stats(request)
     form = FiltersForm()
     regions = [(u'0', u'Вся Украина')]
@@ -51,7 +51,7 @@ def index(page=1):
 @app.route('/filter', methods=['GET', 'POST'])
 @app.route('/filter/<int:page>', methods=['GET', 'POST'])
 def filter(page=1):
-    sort = request.args.get('sort', 'disable')
+    sort = request.args.get('sort', None)
     write_stats(request)
     data = json.loads(session['form_filter'])
     form = FiltersForm()
@@ -178,9 +178,26 @@ def write_stats(request):
     stats.agent_browser = agent.browser
     stats.agent_browser_version = agent.version
     stats.agent_lang = agent.language
-    stats.ip = request.remote_addr
+    
+    trusted_proxies = {'127.0.0.1', '10.9.180.95'}  # define your own set
+    route = request.access_route + [request.remote_addr]
+    remote_addr = next((addr for addr in reversed(route)
+                        if addr not in trusted_proxies), request.remote_addr)
+    
+    stats.ip = remote_addr
     stats.referrer = request.referrer
     stats.time = datetime.utcnow().time()
     stats.date = datetime.utcnow().date()
     db.session.add(stats)
     db.session.commit()
+
+
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('404.html'), 404
+
+
+@app.errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
+    return render_template('500.html'), 500

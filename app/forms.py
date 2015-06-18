@@ -1,6 +1,8 @@
 __author__ = 'dkasyanov'
 from flask.ext.wtf import Form
-from wtforms import SelectField, BooleanField, FloatField, IntegerField
+from wtforms import SelectField, BooleanField, FloatField, IntegerField, StringField
+from wtforms.widgets import TextArea
+
 
 
 class FiltersForm(Form):
@@ -16,3 +18,9 @@ class FiltersForm(Form):
     price_to = IntegerField(u'Price to')
     square_from = FloatField(u'Square from')
     square_to = FloatField(u'Square to')
+
+
+class FeedbackForm(Form):
+    user_name = StringField(u'username')
+    user_email = StringField(u'email')
+    text_comment = StringField(u'textarea', widget=TextArea())

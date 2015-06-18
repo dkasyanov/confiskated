@@ -2,7 +2,7 @@
 __author__ = 'dkasyanov'
 from app import app, db
 from flask import render_template, redirect, url_for, request, g, session, jsonify
-from forms import FiltersForm
+from forms import FiltersForm, FeedbackForm
 from config import LOTS_PER_PAGE
 from models import Lot, Address, Type, Region, Stats, City, Square, Bank
 import json
@@ -146,7 +146,8 @@ def statistics():
 
 @app.route('/about')
 def about():
-    return render_template("about.html")
+    form = FeedbackForm()
+    return render_template("about.html", form=form)
 
 def filter_action(form):
     region_id = (int(form.regionSelector.data) if int(form.regionSelector.data) > 0 else None)

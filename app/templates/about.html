@@ -19,19 +19,24 @@
                 <div id="form_feedback" class="text-center">
                     <h2 >Форма обратной связи</h2>
 
-                    <form action="">
+                    <form method="post" action="/" name="feedback">
 
                         <div class="input-group" style="margin: 2px 0">
-                            <span class="input-group-addon" id="sizing-addon1">Имя</span>
-                            <input type="text" id="user_name" class="form-control" name="user" aria-describedby="sizing-addon1" style="margin: 0 "/><br>
+                            {{ form.hidden_tag() }}
+                            <span class="input-group-addon" >Имя</span>
+                            {{ form.user_name(class="form-control", style="margin: 0") }}
+                            <br>
                         </div>
                         <div class="input-group" style="margin: 2px 0">
-                            <span class="input-group-addon" id="sizing-addon1">E-mail</span>
-                            <input type="text" id="user_email" class="form-control" name="email" aria-describedby="sizing-addon1" style="margin: 0"/><br>
+                            <span class="input-group-addon" >E-mail</span>
+                            {{ form.user_email(class="form-control", style="margin: 0", rows=5, cols=20) }}
+                            <br>
                         </div>
 
+                        {{ form.text_comment(class="form-control", placeholder="Ваш комментарий", style="height: 100px") }}
+                        <br>
 
-                        <textarea name="comment" id="information" class="form-control" rows="3" placeholder="Ваш комментарий"></textarea><br>
+                        <button type="button" class="btn btn-default">Отправить</button>
                     </form>
                 </div>
 
@@ -39,6 +44,6 @@
         </div>
 
     </div>
-
+<footer></footer>
 
 {% endblock %}
